@@ -7,7 +7,7 @@
 %% Not implemented yet
 start(normal, []) -> 
     io:format("Welcome to ErlSMTP~n", []),    
-    erlsmtp_sup_ssl:start_link().
+    erlsmtp_sup:start_link().
     %%erlsmtp_sup_ssl:start_link(),
 
 %% Not implemented yet

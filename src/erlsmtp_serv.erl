@@ -192,7 +192,7 @@ bye(S) -> send(S, "221 Bye", []).
 send_ready(S, Args) -> send(S, "220 ~s ErlSMTP Service Ready", Args).
 hello(S, Args) -> send(S, "250 Hello ~s", Args).
 ehlo(S, Args) -> 
-    send(S, "250 Hello ~s", Args),
+    send(S, "250-EHLO ~s", Args),
     send(S, "250-STARTTLS", []).
 ok(S) -> send(S, "250 Ok", []).
 start_mail(S) -> send(S, "354 Start mail input; end with <CRLF>.<CRLF>", []).

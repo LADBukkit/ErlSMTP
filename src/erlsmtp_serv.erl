@@ -94,7 +94,7 @@ handle_info(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
     bad_sequence(S),
     {noreply, S};
 handle_info(?SOCK("EHLO "++Str), S) ->
-    hello(S, [line(Str)]),
+    ehlo(S, [line(Str)]),
     {noreply, S#state{helo=ehlo,from=none}};
 
 %% Handle MAIL FROM
@@ -191,6 +191,9 @@ accept(_S = #state{socket=Socket,type=ssl}) ->
 bye(S) -> send(S, "221 Bye", []).
 send_ready(S, Args) -> send(S, "220 ~s ErlSMTP Service Ready", Args).
 hello(S, Args) -> send(S, "250 Hello ~s", Args).
+ehlo(S, Args) -> 
+    send(S, "250 Hello ~s", Args),
+    send(S, "250-STARTTLS", []).
 ok(S) -> send(S, "250 Ok", []).
 start_mail(S) -> send(S, "354 Start mail input; end with <CRLF>.<CRLF>", []).
 not_implemented(S) -> send(S, "502 Command not implemented", []).

@@ -100,7 +100,7 @@ handle_info(?SOCK("EHLO "++Str), S) ->
 %% Handle STARTTLS
 handle_info(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     starttls(S),
-    {ok, SslSocket} = ssl:handshake(Socket, {active, once}),
+    {ok, SslSocket} = ssl:handshake(Socket, [{active, once}]), %%%%% todo not working
     {noreply, S#state{socket=SslSocket,type=ssl}};
 
 %% Handle MAIL FROM

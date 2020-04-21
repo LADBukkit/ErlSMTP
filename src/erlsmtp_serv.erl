@@ -89,6 +89,14 @@ handle_info(?SOCK("HELO "++_), S) ->
     bad_sequence(S),
     {noreply, S};
 
+%% Handle EHLO
+handle_info(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
+    bad_sequence(S),
+    {noreply, S};
+handle_info(?SOCK("HELO "++Str), S) ->
+    hello(S, [line(Str)]),
+    {noreply, S#state{helo=ehlo,from=none}};
+
 %% Handle MAIL FROM
 handle_info(?SOCK("MAIL FROM:"++_), S = #state{helo=none}) ->
     bad_sequence(S),

@@ -191,9 +191,7 @@ accept(_S = #state{socket=Socket,type=ssl}) ->
 bye(S) -> send(S, "221 Bye", []).
 send_ready(S, Args) -> send(S, "220 ~s ErlSMTP Service Ready", Args).
 hello(S, Args) -> send(S, "250 Hello ~s", Args).
-ehlo(S, Args) -> 
-    send(S, "250-EHLO ~s", Args),
-    send(S, "250-STARTTLS", []).
+ehlo(S, Args) -> send(S, "250-EHLO ~s\r\n250-STARTTLS", Args).
 ok(S) -> send(S, "250 Ok", []).
 start_mail(S) -> send(S, "354 Start mail input; end with <CRLF>.<CRLF>", []).
 not_implemented(S) -> send(S, "502 Command not implemented", []).

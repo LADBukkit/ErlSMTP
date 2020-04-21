@@ -31,5 +31,5 @@ init([]) ->
 start_socket() -> supervisor:start_child(?MODULE, []).
 
 empty_listeners() ->
-    [start_socket() || _ <- lists:seq(1, 1)],
+    [start_socket() || _ <- lists:seq(1, 20)],
     ok.

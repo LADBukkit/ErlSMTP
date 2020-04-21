@@ -28,8 +28,8 @@ init([Socket, Type]) ->
 handle_call(_E, _From, State) -> {noreply, State}.
 
 %% Accept connection
-handle_cast(accept, S = #state{socket=ListenSocket}) ->
-    {ok, AcceptSocket} = gen_tcp:accept(ListenSocket),
+handle_cast(accept, S) ->
+    {ok, AcceptSocket} = accept(S),
 
     %% Start new acceptor
     erlsmtp_sup:start_socket(),
@@ -142,12 +142,6 @@ handle_info({tcp_error, _Socket, _}, S) ->
 %% Empty handle_info
 handle_info(_E, S) -> {noreply, S}.
 
-%% Sends a message through a socket
-send(S = #state{socket=Socket,type=normal}, Str, Args) ->
-    ok = gen_tcp:send(Socket, io_lib:format(Str ++ "\r\n", Args)),
-    ok = set_active(S),
-    ok.
-
 %% Removes linebreak
 line(Str) -> hd(string:tokens(Str, "\r\n")).
 
@@ -161,11 +155,29 @@ trim_data(Str) ->
         _ -> Str
     end.
 
+%% Sends a message through a socket
+send(S = #state{socket=Socket,type=normal}, Str, Args) ->
+    ok = gen_tcp:send(Socket, io_lib:format(Str ++ "\r\n", Args)),
+    ok = set_active(S),
+    ok;
+send(S = #state{socket=Socket,type=ssl}, Str, Args) ->
+    ok = ssl:send(Socket, io_lib:format(Str ++ "\r\n", Args)),
+    ok = set_active(S),
+    ok.
+
 %% Sets the socket to active once
-set_active(_S = #state{socket=Socket,type=normal}) -> inet:setopts(Socket, [{active, once}]).
+set_active(_S = #state{socket=Socket,type=normal}) -> inet:setopts(Socket, [{active, once}]);
+set_active(_S = #state{socket=Socket,type=ssl}) -> ssl:setopts(Socket, [{active, once}]).
 
 %% Gets the peername
-peername(_S = #state{socket=Socket,type=normal}) -> inet:peername(Socket).
+peername(_S = #state{socket=Socket,type=normal}) -> inet:peername(Socket);
+peername(_S = #state{socket=Socket,type=ssl}) -> ssl:peername(Socket).
+
+%% Accepts a socket
+accept(_S = #state{socket=Socket,type=normal}) -> gen_tcp:accept(Socket);
+accept(_S = #state{socket=Socket,type=ssl}) -> 
+    {ok, TLS} = ssl:transport_accept(Socket),
+    ssl:handshake(TLS).
 
 %% MESSAGE SENDING
 bye(S) -> send(S, "221 Bye", []).

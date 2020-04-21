@@ -11,7 +11,7 @@
             erlsmtp_sup,
             erlsmtp_serv
         ]},
-        {applications, [stdlib, kernel]},
+        {applications, [stdlib, kernel, crypto, public_key, asn1, ssl]},
         {env, [
             {port, 25},
             {port_ssl, 465},

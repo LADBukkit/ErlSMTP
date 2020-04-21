@@ -100,7 +100,7 @@ handle_info(?SOCK("EHLO "++Str), S) ->
 %% Handle STARTTLS
 handle_info(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     starttls(S),
-    inet:setopts(Socket, [{active, false}]),
+    ok = inet:setopts(Socket, [{active, false}]),
     {ok, SslSocket} = ssl:handshake(Socket, [{cacertfile, "cacerts.pem"},{certfile, "cert.pem"}, {keyfile, "key.pem"}]),
     {noreply, S#state{socket=SslSocket,type=ssl}};
 

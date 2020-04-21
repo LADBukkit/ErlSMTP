@@ -9,8 +9,7 @@
         {modules, [
             erlsmtp,
             erlsmtp_sup,
-            erlsmtp_serv,
-            erlsmtp_sup_ssl
+            erlsmtp_serv
         ]},
         {applications, [stdlib, kernel]},
         {env, [

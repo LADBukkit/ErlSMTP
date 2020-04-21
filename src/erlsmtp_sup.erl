@@ -12,7 +12,7 @@ init([]) ->
     {ok, Port} = application:get_env(port),
     io:format("Starting normal Server on port ~p~n", [Port]),
 
-    ssl:start(),
+    ok = ssl:start(),
 
     %% Start server in active_once & packet_line mode
     {ok, ListenSocket} = gen_tcp:listen(Port, [{active, once}, {packet, line}]),

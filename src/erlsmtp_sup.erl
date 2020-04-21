@@ -8,9 +8,9 @@
 start_link() -> supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    io:format("Welcome to ErlSMTP~n", []),
     %% Get Port from application environment
     {ok, Port} = application:get_env(port),
+    io:format("Starting normal Server on port ~p~n", [Port]),
 
     %% Start server in active_once & packet_line mode
     {ok, ListenSocket} = gen_tcp:listen(Port, [{active, once}, {packet, line}]),
@@ -22,7 +22,7 @@ init([]) ->
         {simple_one_for_one, 60, 3600}, %% Restart strategy
         [{                              %% Client Specs
             socket,
-            {erlsmtp_serv, start_link, [ListenSocket]},
+            {erlsmtp_serv, start_link, [[ListenSocket, normal]]},
             temporary, 1000, worker, [erlsmtp_serv]
         }]
     }}.

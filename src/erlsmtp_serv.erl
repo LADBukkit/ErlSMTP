@@ -93,7 +93,7 @@ handle_info(?SOCK("HELO "++_), S) ->
 handle_info(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("HELO "++Str), S) ->
+handle_info(?SOCK("EHLO "++Str), S) ->
     hello(S, [line(Str)]),
     {noreply, S#state{helo=ehlo,from=none}};
 

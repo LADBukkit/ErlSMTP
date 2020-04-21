@@ -195,7 +195,7 @@ accept(_S = #state{socket=Socket,type=ssl}) ->
 
 %% MESSAGE SENDING
 send_ready(S, Args) -> send(S, "220 ~s ErlSMTP Service Ready", Args).
-starttls(S) -> send(S, "220 STARTTLS Go ahead").
+starttls(S) -> send(S, "220 STARTTLS Go ahead", []).
 bye(S) -> send(S, "221 Bye", []).
 hello(S, Args) -> send(S, "250 Hello ~s", Args).
 ehlo(S, Args) -> send(S, "250-EHLO ~s\r\n250 STARTTLS", Args).

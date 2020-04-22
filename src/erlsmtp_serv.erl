@@ -101,7 +101,7 @@ handle_info(?SOCK("EHLO "++Str), S) ->
 handle_info(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     starttls(S),
     ok = inet:setopts(Socket, [{active, false}]),
-    {ok, SslSocket} = ssl:ssl_accept(Socket, [{certfile, "cert.pem"}, {keyfile, "key.pem"}]),
+    {ok, SslSocket} = ssl:ssl_accept(Socket, [{packet, line},{mode, list},{ssl_imp, new},{certfile, "cert.pem"}, {keyfile, "key.pem"}]),
     ok = ssl:setopts(SslSocket, [{packet, line}]),
     {noreply, S#state{socket=SslSocket,type=ssl}};
 

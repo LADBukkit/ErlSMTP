@@ -48,8 +48,23 @@ handle_cast(accept, S) ->
 %% Empty handle_cast
 handle_cast(_E, S) -> {noreply, S}.
 
+
+%% Handle closed
+handle_info({tcp_closed, _Socket}, S) ->
+    {stop, normal, S};
+
+handle_info({ssl_closed, _Socket}, S) ->
+    {stop, normal, S};
+
+%% Handle error
+handle_info({tcp_error, _Socket, _}, S) ->
+    {stop, normal, S};
+
+handle_info({ssl_error, _Socket, _}, S) ->
+    {stop, normal, S};
+
 handle_info(A, B) -> 
-    io:format("~p~n", [A]),
+    %io:format("~p~n", [A]),
     handle_info_debug(A, B).
 
 %% Handle text after DATA
@@ -150,14 +165,6 @@ handle_info_debug(?SOCK(Str), S) ->
     io:format("Not Implemented Command from ~p:~p -> ~s~n", [Ip, Port, line(Str)]),
     not_implemented(S),
     {noreply, S};
-
-%% Handle closed
-handle_info_debug({tcp_closed, _Socket}, S) ->
-    {stop, normal, S};
-
-%% Handle error
-handle_info_debug({tcp_error, _Socket, _}, S) ->
-    {stop, normal, S};
 
 %% Empty handle_info_debug
 handle_info_debug(_E, S) -> {noreply, S}.

@@ -94,9 +94,9 @@ handle_info_debug(?SOCK("HELO "++_), S) ->
     {noreply, S};
 
 %% Handle EHLO
-handle_info_debug(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
-    bad_sequence(S),
-    {noreply, S};
+%handle_info_debug(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
+%    bad_sequence(S),
+%    {noreply, S};
 handle_info_debug(?SOCK("EHLO "++Str), S) ->
     ehlo(S, [line(Str)]),
     {noreply, S#state{helo=ehlo,from=none}};

@@ -106,7 +106,7 @@ handle_info_debug(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     starttls(S),
     ok = inet:setopts(Socket, [{active, false}]),
     {ok, SslSocket} = ssl:ssl_accept(Socket, [{packet, line},{mode, list},{ssl_imp, new},{certfile, "cert.pem"}, {keyfile, "key.pem"}]),
-    ok = ssl:setopts(SslSocket, [{packet, line}]),
+    ok = ssl:setopts(SslSocket, [{packet, line},{active, once}]),
     {noreply, S#state{socket=SslSocket,type=ssl}};
 
 %% Handle MAIL FROM

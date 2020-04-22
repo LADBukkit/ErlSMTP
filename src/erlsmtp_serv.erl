@@ -15,7 +15,7 @@
 
 -export([init/1, start_link/1, handle_cast/2, handle_info/2, handle_call/3]).
 
--define(SOCK(Msg), {tcp, _Port, Msg}).
+-define(SOCK(Msg), {_, _Port, Msg}).
 
 start_link(Args) -> gen_server:start_link(?MODULE, Args, []).
 
@@ -106,7 +106,7 @@ handle_info_debug(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     starttls(S),
     ok = inet:setopts(Socket, [{active, false}]),
     {ok, SslSocket} = ssl:ssl_accept(Socket, [{packet, line},{mode, list},{ssl_imp, new},{certfile, "cert.pem"}, {keyfile, "key.pem"}]),
-    ok = ssl:setopts(SslSocket, [{packet, line},{active, once}]),
+    ok = ssl:setopts(SslSocket, [{packet, line}]),
     {noreply, S#state{socket=SslSocket,type=ssl}};
 
 %% Handle MAIL FROM

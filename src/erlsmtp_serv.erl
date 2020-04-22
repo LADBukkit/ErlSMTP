@@ -63,7 +63,7 @@ handle_info({tcp_error, _Socket, _}, S) ->
 handle_info({ssl_error, _Socket, _}, S) ->
     {stop, normal, S};
 
-handle_info(A, B) -> 
+handle_info(A = {Prot, _, _}, B) when Prot =:= tcp; Prot =:= ssl -> 
     %io:format("~p~n", [A]),
     handle_info_debug(A, B).
 

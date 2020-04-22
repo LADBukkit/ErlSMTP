@@ -142,8 +142,14 @@ handle_info_debug(?SOCK("RCPT TO:"++_), S = #state{from=none}) ->
     {noreply, S};
 handle_info_debug(?SOCK("RCPT TO:"++Str), S = #state{to=Rcpt}) ->
     Recv = strip_routing(line(Str)), %% TODO Check if local
-    ok(S),
-    {noreply, S#state{to=Rcpt++[Recv]}};
+    case is_local(Recv) of
+        ok -> 
+            ok(S),
+            {noreply, S#state{to=Rcpt++[Recv]}};
+        error ->
+            user_not_local(S),
+            {noreply, S}
+    end;
 
 %% Handle DATA
 handle_info_debug(?SOCK("DATA:"++_), S = #state{helo=none}) ->
@@ -182,6 +188,14 @@ trim_data(Str) ->
         _ -> Str
     end.
 
+%% checks if an email address belongs to this server
+is_local(Str) ->
+    {ok, Address} = application:get_env(address),
+    case hd(list:reverse(string:tokens(Str, "@"))) of
+        Address -> ok;
+        _ -> error
+    end.
+
 %% Sends a message through a socket
 send(S = #state{socket=Socket,type=normal}, Str, Args) ->
     ok = gen_tcp:send(Socket, io_lib:format(Str ++ "\r\n", Args)),
@@ -216,3 +230,4 @@ ok(S) -> send(S, "250 Ok", []).
 start_mail(S) -> send(S, "354 Start mail input; end with <CRLF>.<CRLF>", []).
 not_implemented(S) -> send(S, "502 Command not implemented", []).
 bad_sequence(S) -> send(S, "503 Bad sequence of commands", []).
+user_not_local(S) -> send(S, "550 Mailbox unavailable", []).

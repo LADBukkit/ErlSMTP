@@ -1,7 +1,0 @@
-{
-    ["src/*", "test/*"],
-    [
-        {i, "include"},
-        {outdir, "ebin"}
-    ]
-}.

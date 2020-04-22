@@ -1,7 +1,7 @@
 build:
-	erl -make
+	rebar3 compile
 
 run:
-	erl -pa ebin/ -eval "application:start(erlsmtp)"
+	rebar3 shell
 
 build-run: build run

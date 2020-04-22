@@ -1,0 +1,18 @@
+{application, erlsmtp,
+ [{description, "A simple SMTP Server in erlang"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {erlsmtp_app, []}},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[{port, 25},
+        {port_ssl, 465},
+        {address, "localhost"}
+  ]},
+  {modules, []},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.

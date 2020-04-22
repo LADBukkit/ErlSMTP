@@ -49,7 +49,7 @@ handle_cast(accept, S) ->
 handle_cast(_E, S) -> {noreply, S}.
 
 handle_info(A, B) -> 
-    io:format("~p~n", A),
+    io:format("~p~n", [A]),
     handle_info_debug(A, B).
 
 %% Handle text after DATA

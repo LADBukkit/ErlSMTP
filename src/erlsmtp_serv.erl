@@ -197,7 +197,7 @@ accept(_S = #state{socket=Socket,type=ssl}) ->
 
 %% MESSAGE SENDING
 send_ready(S, Args) -> send(S, "220 ~s ErlSMTP Service Ready", Args).
-starttls(S) -> send(S, "220 STARTTLS Go ahead", []).
+starttls(_S = #state{socket=Socket}) -> gen_tcp:send(Socket, io_lib:format("220 STARTTLS Go ahead\r\n", [])).
 bye(S) -> send(S, "221 Bye", []).
 hello(S, Args) -> send(S, "250 Hello ~s", Args).
 ehlo(S, Args) -> send(S, "250-EHLO ~s\r\n250 STARTTLS", Args).

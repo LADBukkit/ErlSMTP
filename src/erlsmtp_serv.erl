@@ -48,8 +48,12 @@ handle_cast(accept, S) ->
 %% Empty handle_cast
 handle_cast(_E, S) -> {noreply, S}.
 
+handle_info(A, B) -> 
+    io:format("~p~n", A),
+    handle_info_debug(A, B).
+
 %% Handle text after DATA
-handle_info(?SOCK(Str), S = #state{dataState=Ds,data=Data}) when Ds > 0 ->
+handle_info_debug(?SOCK(Str), S = #state{dataState=Ds,data=Data}) when Ds > 0 ->
     NData = Data++Str,
     NState = case Str of
         ".\r\n" when Ds =:= 1 -> 2;
@@ -67,38 +71,38 @@ handle_info(?SOCK(Str), S = #state{dataState=Ds,data=Data}) when Ds > 0 ->
     end;
 
 %% Handle NOOP
-handle_info(?SOCK("NOOP"++_), S) -> 
+handle_info_debug(?SOCK("NOOP"++_), S) -> 
     ok(S),
     {noreply, S};
 
 %% Handle QUIT
-handle_info(?SOCK("QUIT"++_), S) ->
+handle_info_debug(?SOCK("QUIT"++_), S) ->
     bye(S),
     {stop, normal, S};
 
 %% Handle RSET
-handle_info(?SOCK("RSET"++_), S) ->
+handle_info_debug(?SOCK("RSET"++_), S) ->
     ok(S),
     {noreply, S#state{from=none,to=[],data="",dataState=0}};
 
 %% Handle HELO
-handle_info(?SOCK("HELO "++Str), S = #state{helo=none}) ->
+handle_info_debug(?SOCK("HELO "++Str), S = #state{helo=none}) ->
     hello(S, [line(Str)]),
     {noreply, S#state{helo=helo,from=none}};
-handle_info(?SOCK("HELO "++_), S) ->
+handle_info_debug(?SOCK("HELO "++_), S) ->
     bad_sequence(S),
     {noreply, S};
 
 %% Handle EHLO
-handle_info(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
+handle_info_debug(?SOCK("EHLO "++_), S = #state{helo=ehlo}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("EHLO "++Str), S) ->
+handle_info_debug(?SOCK("EHLO "++Str), S) ->
     ehlo(S, [line(Str)]),
     {noreply, S#state{helo=ehlo,from=none}};
 
 %% Handle STARTTLS
-handle_info(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
+handle_info_debug(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     starttls(S),
     ok = inet:setopts(Socket, [{active, false}]),
     {ok, SslSocket} = ssl:ssl_accept(Socket, [{packet, line},{mode, list},{ssl_imp, new},{certfile, "cert.pem"}, {keyfile, "key.pem"}]),
@@ -106,57 +110,57 @@ handle_info(?SOCK("STARTTLS"++_), S = #state{socket=Socket, helo=ehlo}) ->
     {noreply, S#state{socket=SslSocket,type=ssl}};
 
 %% Handle MAIL FROM
-handle_info(?SOCK("MAIL FROM:"++_), S = #state{helo=none}) ->
+handle_info_debug(?SOCK("MAIL FROM:"++_), S = #state{helo=none}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("MAIL FROM:"++Str), S) ->
+handle_info_debug(?SOCK("MAIL FROM:"++Str), S) ->
     Sender = strip_routing(line(Str)),
     ok(S),
     {noreply, S#state{from=Sender,to=[]}};
 
 %% Handle RCPT TO
-handle_info(?SOCK("RCPT TO:"++_), S = #state{helo=none}) ->
+handle_info_debug(?SOCK("RCPT TO:"++_), S = #state{helo=none}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("RCPT TO:"++_), S = #state{from=none}) ->
+handle_info_debug(?SOCK("RCPT TO:"++_), S = #state{from=none}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("RCPT TO:"++Str), S = #state{to=Rcpt}) ->
+handle_info_debug(?SOCK("RCPT TO:"++Str), S = #state{to=Rcpt}) ->
     Recv = strip_routing(line(Str)), %% TODO Check if local
     ok(S),
     {noreply, S#state{to=Rcpt++[Recv]}};
 
 %% Handle DATA
-handle_info(?SOCK("DATA:"++_), S = #state{helo=none}) ->
+handle_info_debug(?SOCK("DATA:"++_), S = #state{helo=none}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("DATA:"++_), S = #state{from=none}) ->
+handle_info_debug(?SOCK("DATA:"++_), S = #state{from=none}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("DATA:"++_), S = #state{to=[]}) ->
+handle_info_debug(?SOCK("DATA:"++_), S = #state{to=[]}) ->
     bad_sequence(S),
     {noreply, S};
-handle_info(?SOCK("DATA"++_), S) ->
+handle_info_debug(?SOCK("DATA"++_), S) ->
     start_mail(S),
     {noreply, S#state{data=[],dataState=1}};
 
 %% Handle not implemented
-handle_info(?SOCK(Str), S) ->
+handle_info_debug(?SOCK(Str), S) ->
     {ok, {Ip, Port}} = peername(S),
     io:format("Not Implemented Command from ~p:~p -> ~s~n", [Ip, Port, line(Str)]),
     not_implemented(S),
     {noreply, S};
 
 %% Handle closed
-handle_info({tcp_closed, _Socket}, S) ->
+handle_info_debug({tcp_closed, _Socket}, S) ->
     {stop, normal, S};
 
 %% Handle error
-handle_info({tcp_error, _Socket, _}, S) ->
+handle_info_debug({tcp_error, _Socket, _}, S) ->
     {stop, normal, S};
 
-%% Empty handle_info
-handle_info(_E, S) -> {noreply, S}.
+%% Empty handle_info_debug
+handle_info_debug(_E, S) -> {noreply, S}.
 
 %% Removes linebreak
 line(Str) -> hd(string:tokens(Str, "\r\n")).
@@ -197,7 +201,7 @@ accept(_S = #state{socket=Socket,type=ssl}) ->
 
 %% MESSAGE SENDING
 send_ready(S, Args) -> send(S, "220 ~s ErlSMTP Service Ready", Args).
-starttls(_S = #state{socket=Socket}) -> gen_tcp:send(Socket, io_lib:format("220 STARTTLS Go ahead\r\n", [])).
+starttls(S) -> send(S, "220 STARTTLS Go ahead", []).
 bye(S) -> send(S, "221 Bye", []).
 hello(S, Args) -> send(S, "250 Hello ~s", Args).
 ehlo(S, Args) -> send(S, "250-EHLO ~s\r\n250 STARTTLS", Args).

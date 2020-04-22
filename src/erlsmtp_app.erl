@@ -4,7 +4,7 @@
 
 -export([start/2, stop/1]).
 
-start(_StartType, _StartArgs) ->
+start(normal, []) ->
     application:start(crypto),
     application:start(asn1),
     application:start(public_key),

@@ -191,7 +191,7 @@ trim_data(Str) ->
 %% checks if an email address belongs to this server
 is_local(Str) ->
     {ok, Address} = application:get_env(address),
-    case hd(list:reverse(string:tokens(Str, "@"))) of
+    case hd(lists:reverse(string:tokens(Str, "@"))) of
         Address -> ok;
         _ -> error
     end.
